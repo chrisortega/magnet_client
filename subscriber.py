@@ -22,8 +22,10 @@ def save_magnets_to_dir(magnet):
         URL = magnet
         response = requests.get(URL)    
         open(f"{uuid4()}.torrent", "wb").write(response.content)
+        return True
     except Exception as e:
-        return
+        print(f"{e}")
+        return False
 
 
 
@@ -32,7 +34,8 @@ def callback(message):
     magnet = json.loads(message.data)
     
     print(f"saving torrrent {magnet['url']}")    
-    save_magnets_to_dir(magnet = magnet['url'])
+    if save_magnets_to_dir(magnet = magnet['url']):
+        print("saved")
 
 
     message.ack()           
