@@ -11,7 +11,7 @@ import asyncio
 
 from magnet2torrent import Magnet2Torrent, FailedToFetchException
 
-credentials_path = 'neon-mote-358900-516d336a19dd.json'
+credentials_path = 'key.json'
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
 
 
@@ -22,10 +22,12 @@ subscription_path = 'projects/neon-mote-358900/subscriptions/magnetos-sub'
 
 
 
-def fetch_that_torrent(magnet):
+async def fetch_that_torrent(magnet):
     m2t = Magnet2Torrent(magnet)
     try:
-        filename, torrent_data =  m2t.retrieve_torrent()
+        filename, torrent_data = await m2t.retrieve_torrent()
+        print("########")
+        print(torrent_data)
         return filename, torrent_data
     except FailedToFetchException:
         print("Failed")
@@ -38,7 +40,7 @@ def save_magnets_to_dir(magnet):
         open(f"{uuid4()}.torrent", "wb").write(response.content)
         return True
     except Exception as e:
-        print(f"{e}")
+        print(f"error 1 {e}")
         return False
 
 
@@ -48,8 +50,9 @@ def callback(message):
 
     magnet = json.loads(message.data)
     if "magnet" in magnet['url']:
-        filename,data =  fetch_that_torrent(magnet['url'])
-        save_magnets_to_dir(magnet = filename)
+        #filename =  fetch_that_torrent(magnet['url'])
+        filename,torrent_data = asyncio.run(fetch_that_torrent(magnet['url']))
+        save_magnets_to_dir(magnet = torrent_data)
         print("this is a magnet")
 
     else:
